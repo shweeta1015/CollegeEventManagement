@@ -18,7 +18,8 @@ A complete, production-grade full-stack web application designed for academic ev
 6. [Demo Accounts & Credentials](#demo-accounts--credentials)
 7. [API Endpoints Reference](#api-endpoints-reference)
 8. [Automated Testing](#automated-testing)
-9. [College Viva & Presentation Guide](#college-viva--presentation-guide)
+9. [Cloud Deployment Guide (Render, Railway, Atlas)](#cloud-deployment-guide)
+10. [College Viva & Presentation Guide](#college-viva--presentation-guide)
 
 ---
 
@@ -243,7 +244,19 @@ python -m pytest tests/ -v
 
 ---
 
-## 9. College Viva & Presentation Guide
+## 9. Cloud Deployment Guide
+
+The repository includes production deployment configurations for **Render**, **Railway**, and **MongoDB Atlas**:
+- `Procfile` and `render.yaml` for automatic containerized deployment.
+- `railway.json` for Railway NIXPACKS deployments.
+- `wsgi.py` production entrypoint with automatic demo database seeder on initial startup.
+- `run_waitress.py` for multi-threaded production serving on Windows.
+
+For detailed step-by-step instructions with screenshots guidance, refer to **[DEPLOYMENT.md](DEPLOYMENT.md)**.
+
+---
+
+## 10. College Viva & Presentation Guide
 
 ### Key Questions to Anticipate in an ADBMS Viva:
 
