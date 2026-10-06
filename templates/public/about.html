@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}ADBMS Architecture - College Event Management System{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card custom-card p-4 p-md-5 shadow-sm mb-4">
+            <span class="badge bg-primary px-3 py-2 rounded-pill fw-bold mb-3 align-self-start">
+                Advanced Database Management Systems (ADBMS) Project
+            </span>
+            <h1 class="fw-bold mb-3">System Architecture & MongoDB NoSQL Showcase</h1>
+            <p class="lead text-secondary mb-4">
+                This project demonstrates the core theoretical and practical principles of modern NoSQL distributed database systems using <strong>MongoDB</strong> and <strong>PyMongo</strong>.
+            </p>
+
+            <hr class="my-4">
+
+            <!-- Core ADBMS Concepts List -->
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card h-100 p-3 bg-light border-0">
+                        <h5 class="fw-bold text-primary"><i class="fas fa-layer-group me-2"></i>1. Document Model: Embedding vs. Referencing</h5>
+                        <p class="small text-muted mb-0">
+                            <strong>Normalized References (`ObjectId`):</strong> Used for `users`, `events`, `venues`, and `registrations` to maintain independent entity lifecycles and avoid the 16MB document size limit.<br><br>
+                            <strong>Embedded Subdocuments:</strong> Used for event budget breakdowns and organizer feedback responses to ensure atomic single-document read locality without extra joins.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card h-100 p-3 bg-light border-0">
+                        <h5 class="fw-bold text-success"><i class="fas fa-lock me-2"></i>2. Concurrency & Atomicity (Zero Overbooking)</h5>
+                        <p class="small text-muted mb-0">
+                            Demonstrates MongoDB atomic conditional operations using <code>find_one_and_update</code>.<br><br>
+                            When students register concurrently, the query filter <code>{ registered_count: { $lt: capacity } }</code> and atomic update <code>{ $inc: { registered_count: 1 } }</code> guarantees that race conditions never allow capacity to exceed venue limits.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card h-100 p-3 bg-light border-0">
+                        <h5 class="fw-bold text-warning"><i class="fas fa-bolt me-2"></i>3. Indexing Strategies & Query Optimization</h5>
+                        <p class="small text-muted mb-0">
+                            <strong>Unique Indexes:</strong> Enforces uniqueness on <code>users.email</code>, <code>venues.code</code>, and <code>registrations.ticket_code</code>.<br><br>
+                            <strong>Compound Indexes:</strong> <code>{ organizer_id: 1, start_time: 1 }</code> and <code>{ status: 1, start_time: 1 }</code> accelerate multi-key queries and sorting without in-memory sort penalties.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card h-100 p-3 bg-light border-0">
+                        <h5 class="fw-bold text-danger"><i class="fas fa-chart-pie me-2"></i>4. Aggregation Pipeline Framework</h5>
+                        <p class="small text-muted mb-0">
+                            Implements multi-stage aggregation pipelines across analytics dashboards:<br>
+                            <code>$match</code> &rarr; <code>$lookup</code> &rarr; <code>$unwind</code> &rarr; <code>$group</code> &rarr; <code>$project</code> &rarr; <code>$facet</code>.<br><br>
+                            Computes real-time attendance percentages, category popularity, and venue utilization.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-5">
+
+            <!-- Data Model Table -->
+            <h4 class="fw-bold mb-3"><i class="fas fa-table me-2 text-primary"></i>MongoDB Collections Summary</h4>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Collection</th>
+                            <th>Primary Key / Foreign Keys</th>
+                            <th>Indexes</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody class="small">
+                        <tr>
+                            <td><code>users</code></td>
+                            <td><code>_id</code></td>
+                            <td>Unique on <code>email</code></td>
+                            <td>User accounts, role (admin/organizer/student), hashed password.</td>
+                        </tr>
+                        <tr>
+                            <td><code>events</code></td>
+                            <td><code>_id</code>, Ref: <code>organizer_id</code>, <code>venue_id</code></td>
+                            <td>Compound on <code>(organizer_id, start_time)</code></td>
+                            <td>Event details, schedule, capacity counter, budget breakdown.</td>
+                        </tr>
+                        <tr>
+                            <td><code>registrations</code></td>
+                            <td><code>_id</code>, Ref: <code>event_id</code>, <code>student_id</code></td>
+                            <td>Unique on <code>ticket_code</code>, Compound on <code>(event_id, student_id)</code></td>
+                            <td>Attendance state (registered, waitlisted, checked-in, cancelled).</td>
+                        </tr>
+                        <tr>
+                            <td><code>venues</code></td>
+                            <td><code>_id</code></td>
+                            <td>Unique on <code>name</code> and <code>code</code></td>
+                            <td>Auditoriums and seminar halls with facility arrays.</td>
+                        </tr>
+                        <tr>
+                            <td><code>feedback</code></td>
+                            <td><code>_id</code>, Ref: <code>event_id</code>, <code>student_id</code></td>
+                            <td>Unique compound on <code>(event_id, student_id)</code></td>
+                            <td>Attendee reviews with keyword sentiment scoring demo.</td>
+                        </tr>
+                        <tr>
+                            <td><code>notifications</code></td>
+                            <td><code>_id</code>, Ref: <code>user_id</code></td>
+                            <td>Index on <code>(user_id, created_at DESC)</code></td>
+                            <td>In-app notifications for tickets, reminders, waitlists.</td>
+                        </tr>
+                        <tr>
+                            <td><code>audit_logs</code></td>
+                            <td><code>_id</code>, Ref: <code>actor_id</code></td>
+                            <td>Index on <code>timestamp DESC</code></td>
+                            <td>Security audit trail capturing administrative operations.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

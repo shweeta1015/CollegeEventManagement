@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ 'Edit Event' if event else 'Create New Event' }} - Organizer Portal{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-3">
+    <div class="col-lg-9">
+        <div class="card custom-card p-4 p-md-5 shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h3 class="fw-bold mb-1">{{ 'Edit Event' if event else 'Create New Campus Event' }}</h3>
+                    <p class="text-muted small mb-0">Fill in the event parameters below. All constraints are validated on both client and backend.</p>
+                </div>
+                <a href="{{ url_for('organizer.dashboard') }}" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-times me-1"></i> Cancel
+                </a>
+            </div>
+
+            <form method="POST" enctype="multipart/form-data">
+                <div class="row g-3 mb-3">
+                    <div class="col-md-8">
+                        <label class="form-label fw-bold small">Event Title (2–200 characters)</label>
+                        <input type="text" name="title" class="form-control" minlength="2" maxlength="200" placeholder="e.g., Annual Hackathon 2026" value="{{ event.title if event else '' }}" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold small">Category</label>
+                        <select name="category" class="form-select" required>
+                            <option value="">Choose category...</option>
+                            {% for cat in categories %}
+                                <option value="{{ cat }}" {% if event and event.category == cat %}selected{% endif %}>{{ cat }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold small">Select Campus Venue</label>
+                        <select name="venue_id" id="venueSelect" class="form-select" required onchange="updateVenueLimit()">
+                            <option value="">Select venue...</option>
+                            {% for v in venues %}
+                                <option value="{{ v._id }}" data-capacity="{{ v.capacity }}" {% if event and event.venue_id|string == v._id|string %}selected{% endif %}>
+                                    {{ v.name }} (Cap: {{ v.capacity }} | Code: {{ v.code }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold small">Event Capacity (Attendees)</label>
+                        <input type="number" name="capacity" id="capacityInput" class="form-control" min="1" placeholder="e.g., 50" value="{{ event.capacity if event else '' }}" required>
+                        <div class="form-text small" id="venueCapHint">Capacity cannot exceed venue maximum limit.</div>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold small">Start Date & Time (Must be in the future)</label>
+                        <input type="datetime-local" name="start_time" class="form-control" value="{{ event.start_time.strftime('%Y-%m-%dT%H:%M') if event and event.start_time else '' }}" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold small">End Date & Time (Min. 1 hour after start)</label>
+                        <input type="datetime-local" name="end_time" class="form-control" value="{{ event.end_time.strftime('%Y-%m-%dT%H:%M') if event and event.end_time else '' }}" required>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold small">Event Description (Minimum 50 characters, Markdown supported safely)</label>
+                    <textarea name="description" class="form-control" rows="5" minlength="50" placeholder="Provide comprehensive details about this event, agenda, speakers, prerequisites, and instructions..." required>{{ event.description if event else '' }}</textarea>
+                </div>
+
+                <!-- Budget Breakdown Section -->
+                <div class="p-3 bg-light rounded border mb-3">
+                    <h6 class="fw-bold text-dark mb-2"><i class="fas fa-coins text-warning me-1"></i> Event Budget (INR)</h6>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">Total Budget Estimated (₹)</label>
+                            <input type="number" step="0.01" name="budget_total" id="budgetTotal" class="form-control" placeholder="0.00" value="{{ event.budget.total if event and event.budget else 0.0 }}" required>
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label small fw-bold">Budget Itemized Breakdown (Required if > ₹10,000)</label>
+                            <textarea name="budget_breakdown" class="form-control" rows="2" placeholder="List item costs e.g., Audio: ₹5,000; Refreshments: ₹8,000">{{ event.budget.breakdown | map(attribute='item') | join('\n') if event and event.budget and event.budget.breakdown else '' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Banner Image Upload -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold small">Banner Poster Image (Optional, Max 5MB, JPG/PNG/WEBP)</label>
+                    <input type="file" name="banner_image" class="form-control" accept=".jpg,.jpeg,.png,.webp">
+                    {% if event and event.banner_image %}
+                        <div class="small text-muted mt-1">Current banner: <code>{{ event.banner_image }}</code></div>
+                    {% endif %}
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <button type="submit" class="btn btn-primary px-4 fw-bold">
+                        <i class="fas fa-check me-1"></i> {{ 'Save Changes' if event else 'Publish Event' }}
+                    </button>
+                    <a href="{{ url_for('organizer.dashboard') }}" class="btn btn-outline-secondary">Back to Dashboard</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function updateVenueLimit() {
+    const venueSelect = document.getElementById("venueSelect");
+    const capInput = document.getElementById("capacityInput");
+    const hint = document.getElementById("venueCapHint");
+    const selected = venueSelect.options[venueSelect.selectedIndex];
+    const maxCap = selected.getAttribute("data-capacity");
+
+    if (maxCap) {
+        capInput.max = maxCap;
+        hint.innerHTML = `<span class="text-primary"><i class="fas fa-info-circle"></i> Venue maximum capacity: <strong>${maxCap}</strong> seats.</span>`;
+    } else {
+        capInput.removeAttribute("max");
+        hint.innerText = "Capacity cannot exceed venue maximum limit.";
+    }
+}
+document.addEventListener("DOMContentLoaded", updateVenueLimit);
+</script>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Submit Feedback - {{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+    <div class="col-lg-7">
+        <div class="card custom-card p-4 p-md-5 shadow-sm">
+            <div class="mb-4">
+                <span class="badge bg-success mb-2"><i class="fas fa-check-circle me-1"></i> Attendance Verified</span>
+                <h3 class="fw-bold mb-1">{{ 'Edit Feedback' if feedback else 'Submit Event Feedback' }}</h3>
+                <p class="text-muted small">Event: <strong>{{ event.title }}</strong></p>
+            </div>
+
+            <!-- Demo Sentiment Notice -->
+            <div class="alert alert-light border small text-secondary p-3 mb-4">
+                <i class="fas fa-robot text-primary me-1"></i>
+                <strong>Sentiment Analysis Demonstration:</strong> Comments are analyzed by a keyword rule classifier to highlight positive, neutral, or constructive takeaways for the college administration.
+            </div>
+
+            <form method="POST" action="{{ url_for('student.feedback', event_id=event._id) }}">
+                <!-- Star Rating -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Overall Rating (1 to 5 Stars)</label>
+                    <div class="d-flex gap-3">
+                        {% for r in range(1, 6) %}
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="rating" id="rating_{{ r }}" value="{{ r }}" {% if feedback and feedback.rating == r %}checked{% elif not feedback and r == 5 %}checked{% endif %} required>
+                                <label class="form-check-label fw-bold" for="rating_{{ r }}">
+                                    {{ r }} <i class="fas fa-star text-warning"></i>
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Comment Input -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Detailed Review / Suggestions (Max 1000 characters)</label>
+                    <textarea name="comment" class="form-control" rows="5" maxlength="1000" placeholder="What did you think of the event? Mention speaker quality, organization, venue comfort..." required>{{ feedback.comment if feedback else '' }}</textarea>
+                    <div class="form-text small">Try words like <em>great, fantastic, clear</em> or constructive words like <em>delayed, crowded</em> to test sentiment tagging.</div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <button type="submit" class="btn btn-primary px-4 fw-bold">
+                        <i class="fas fa-paper-plane me-1"></i> {{ 'Update Feedback' if feedback else 'Submit Feedback' }}
+                    </button>
+                    <a href="{{ url_for('student.dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+
+            {% if feedback %}
+                <hr class="my-4">
+                <div class="d-flex justify-content-between align-items-center text-muted">
+                    <small>Submitted on {{ feedback.created_at | date_format }}</small>
+                    <form method="POST" action="{{ url_for('student.remove_feedback', feedback_id=feedback._id) }}" onsubmit="return confirm('Are you sure you want to delete this review?');">
+                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                            <i class="fas fa-trash-alt me-1"></i> Delete Feedback
+                        </button>
+                    </form>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

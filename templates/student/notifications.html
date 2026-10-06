@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}Notifications Center - College Events Portal{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+    <div class="col-lg-8">
+        <div class="card custom-card p-4 shadow-sm mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h3 class="fw-bold mb-1"><i class="fas fa-bell text-primary me-2"></i>In-App Notifications</h3>
+                    <p class="text-muted small mb-0">{{ unread_count }} unread message{{ 's' if unread_count != 1 else '' }}</p>
+                </div>
+                {% if unread_count > 0 %}
+                    <form method="POST" action="{{ url_for('student.mark_all_read') }}">
+                        <button type="submit" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-check-double me-1"></i> Mark All as Read
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+
+            {% if notifications %}
+                <div class="list-group list-group-flush">
+                    {% for n in notifications %}
+                        <div class="list-group-item px-0 py-3 {% if not n.is_read %}bg-light rounded p-3 mb-2 border{% endif %}">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3 fs-4">
+                                        {% if n.type == 'registration' %}
+                                            <i class="fas fa-ticket-alt text-primary"></i>
+                                        {% elif n.type == 'waitlist_promoted' %}
+                                            <i class="fas fa-bullhorn text-success"></i>
+                                        {% elif n.type == 'reminder' %}
+                                            <i class="fas fa-clock text-warning"></i>
+                                        {% elif n.type == 'cancellation' %}
+                                            <i class="fas fa-ban text-danger"></i>
+                                        {% else %}
+                                            <i class="fas fa-info-circle text-info"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold mb-0 {% if not n.is_read %}text-primary{% endif %}">{{ n.title }}</h6>
+                                        <small class="text-muted">{{ n.created_at | datetime_format }}</small>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex gap-1">
+                                    {% if not n.is_read %}
+                                        <form method="POST" action="{{ url_for('student.mark_read', notif_id=n._id) }}" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-link text-primary p-0 me-2" title="Mark as Read">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                    {% if not n.is_archived %}
+                                        <form method="POST" action="{{ url_for('student.archive_notif', notif_id=n._id) }}" class="d-inline">
+                                            <button type="submit" class="btn btn-sm btn-link text-secondary p-0 me-2" title="Archive">
+                                                <i class="fas fa-archive"></i>
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                    <form method="POST" action="{{ url_for('student.delete_notif', notif_id=n._id) }}" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-link text-danger p-0" title="Delete">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            <p class="text-secondary small mb-0 ms-5">{{ n.message }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="fas fa-bell-slash fa-3x text-secondary mb-3"></i>
+                    <p class="lead">You have no notifications at this time.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

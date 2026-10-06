@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}QR Check-in Console - {{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a href="{{ url_for('organizer.dashboard') }}">Organizer</a></li>
+                <li class="breadcrumb-item active">Check-In Console</li>
+            </ol>
+        </nav>
+        <h3 class="fw-bold mb-0"><i class="fas fa-qrcode text-success me-2"></i>QR Attendee Check-In Console</h3>
+        <p class="text-muted small mb-0">Event: <strong>{{ event.title }}</strong> &bull; Capacity: {{ event.capacity }}</p>
+    </div>
+    <a href="{{ url_for('organizer.attendees_roster', event_id=event._id) }}" class="btn btn-outline-primary btn-sm">
+        <i class="fas fa-list me-1"></i> Full Attendee Roster
+    </a>
+</div>
+
+<div class="row g-4">
+    <!-- Scanner / Input Terminal Column -->
+    <div class="col-lg-6">
+        <div class="card custom-card p-4 shadow-sm h-100">
+            <h5 class="fw-bold mb-3"><i class="fas fa-barcode text-primary me-2"></i>Ticket Verification Scanner</h5>
+            <p class="small text-muted mb-3">
+                Scan the attendee's QR code using a handheld barcode scanner, mobile camera, or manually type the ticket code (e.g. <code>TKT-XXXXXXXXXXXX</code>).
+            </p>
+
+            <!-- Async Verification Alert Container -->
+            <div id="checkinResultAlert" class="alert d-none" role="alert"></div>
+            <div id="checkinDetails"></div>
+
+            <form id="asyncCheckinForm" class="mt-2">
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Ticket Code</label>
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-white"><i class="fas fa-qrcode text-muted"></i></span>
+                        <input type="text" id="ticket_code_input" class="form-control text-uppercase fw-bold" placeholder="TKT-..." autofocus required autocomplete="off">
+                    </div>
+                    <div class="form-text small">Press Enter to instantly verify ticket and record attendance in MongoDB.</div>
+                </div>
+
+                <button type="submit" class="btn btn-success btn-lg w-100 fw-bold shadow-sm">
+                    <i class="fas fa-check-circle me-1"></i> Verify & Check-In Attendee
+                </button>
+            </form>
+
+            <hr class="my-4">
+
+            <div class="small text-muted">
+                <h6 class="fw-bold text-dark mb-1"><i class="fas fa-shield-alt text-success me-1"></i> Concurrency & Validation Guards:</h6>
+                <ul class="mb-0 ps-3">
+                    <li>Validates ticket code exists in MongoDB <code>registrations</code> collection.</li>
+                    <li>Ensures registration belongs to <strong>{{ event.title }}</strong>.</li>
+                    <li>Strictly prevents double check-ins (rejects already-scanned tickets).</li>
+                    <li>Enforces organizer ownership check against IDOR exploits.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Check-Ins Table Column -->
+    <div class="col-lg-6">
+        <div class="card custom-card p-4 shadow-sm h-100">
+            <h5 class="fw-bold mb-3"><i class="fas fa-history text-secondary me-2"></i>Live Check-In Stream</h5>
+            <div class="table-responsive">
+                <table class="table table-sm table-hover align-middle">
+                    <thead class="table-light small">
+                        <tr>
+                            <th>Ticket</th>
+                            <th>Status</th>
+                            <th>Checked-In Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="liveCheckinTableBody" class="small">
+                        {% if recent_checkins %}
+                            {% for c in recent_checkins %}
+                                <tr>
+                                    <td><code>{{ c.ticket_code }}</code></td>
+                                    <td><span class="badge bg-success">Checked-In</span></td>
+                                    <td>{{ c.check_in_time | datetime_format }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr id="noCheckinsRow">
+                                <td colspan="3" class="text-center py-4 text-muted">No check-ins recorded yet for this session.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/checkin.js') }}"></script>
+{% endblock %}

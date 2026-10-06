@@ -1,0 +1,106 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
+    <div class="container">
+        <a class="navbar-brand text-primary fw-bold" href="{{ url_for('main.index') }}">
+            <i class="fas fa-graduation-cap me-2 text-warning"></i>College Events
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.events_catalog') }}">
+                        <i class="fas fa-calendar-alt me-1"></i> Browse Events
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('main.about') }}">
+                        <i class="fas fa-database me-1"></i> ADBMS Architecture
+                    </a>
+                </li>
+            </ul>
+
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
+                {% if current_user_id %}
+                    <!-- Role-Based Navigation Options -->
+                    {% if current_user_role == 'admin' %}
+                        <li class="nav-item">
+                            <a class="nav-link text-warning fw-semibold" href="{{ url_for('admin.dashboard') }}">
+                                <i class="fas fa-shield-alt me-1"></i> Admin Portal
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('admin.venues') }}">
+                                <i class="fas fa-map-marker-alt me-1"></i> Venues
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('admin.reports') }}">
+                                <i class="fas fa-chart-line me-1"></i> Reports
+                            </a>
+                        </li>
+                    {% elif current_user_role == 'organizer' %}
+                        <li class="nav-item">
+                            <a class="nav-link text-info fw-semibold" href="{{ url_for('organizer.dashboard') }}">
+                                <i class="fas fa-tasks me-1"></i> Organizer Portal
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link btn btn-sm btn-outline-primary text-white ms-lg-2 px-3" href="{{ url_for('organizer.new_event') }}">
+                                <i class="fas fa-plus me-1"></i> Create Event
+                            </a>
+                        </li>
+                    {% elif current_user_role == 'student' %}
+                        <li class="nav-item">
+                            <a class="nav-link fw-semibold" href="{{ url_for('student.dashboard') }}">
+                                <i class="fas fa-ticket-alt me-1"></i> My Dashboard
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    <!-- In-App Notification Bell -->
+                    <li class="nav-item position-relative ms-lg-2">
+                        <a class="nav-link text-white" href="{{ url_for('student.notifications_view') }}" title="Notifications">
+                            <i class="fas fa-bell"></i>
+                            {% if unread_notifications_count > 0 %}
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.65rem;">
+                                    {{ unread_notifications_count }}
+                                </span>
+                            {% endif %}
+                        </a>
+                    </li>
+
+                    <!-- User Dropdown -->
+                    <li class="nav-item dropdown ms-lg-3">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center text-white" href="#" role="button" data-bs-toggle="dropdown">
+                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px; font-weight: bold;">
+                                {{ current_user_name[0] if current_user_name else 'U' }}
+                            </div>
+                            <span>{{ current_user_name }}</span>
+                            <span class="badge bg-secondary ms-2 text-uppercase" style="font-size: 0.65rem;">{{ current_user_role }}</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow">
+                            <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}"><i class="fas fa-user-cog me-2"></i> Profile & Settings</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.suggestions') }}"><i class="fas fa-comment-dots me-2"></i> Feedback & Suggestions</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt me-2"></i> Sign Out</a></li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <!-- Guest Links -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auth.login') }}">
+                            <i class="fas fa-sign-in-alt me-1"></i> Sign In
+                        </a>
+                    </li>
+                    <li class="nav-item ms-lg-2">
+                        <a class="btn btn-primary btn-sm px-3" href="{{ url_for('auth.register') }}">
+                            <i class="fas fa-user-plus me-1"></i> Register
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>

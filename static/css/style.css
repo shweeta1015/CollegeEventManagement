@@ -1,0 +1,154 @@
+:root {
+    --primary-color: #1a56db;
+    --primary-hover: #1e429f;
+    --secondary-color: #4b5563;
+    --accent-color: #7e3af2;
+    --success-color: #0e9f6e;
+    --warning-color: #d97706;
+    --danger-color: #e02424;
+    --bg-light: #f8fafc;
+    --card-border: #e2e8f0;
+}
+
+body {
+    background-color: var(--bg-light);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: #1e293b;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1 0 auto;
+}
+
+/* Navbar */
+.navbar-brand {
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.nav-link {
+    font-weight: 500;
+    transition: color 0.15s ease-in-out;
+}
+
+/* Hero Section */
+.hero-banner {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%);
+    color: white;
+    padding: 4.5rem 1rem;
+    border-radius: 0 0 1.5rem 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+/* Cards */
+.custom-card {
+    border: 1px solid var(--card-border);
+    border-radius: 0.85rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background: white;
+}
+
+.custom-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06);
+}
+
+.stat-card {
+    border-left: 4px solid var(--primary-color);
+}
+
+.stat-card.success {
+    border-left-color: var(--success-color);
+}
+
+.stat-card.warning {
+    border-left-color: var(--warning-color);
+}
+
+.stat-card.danger {
+    border-left-color: var(--danger-color);
+}
+
+/* Category Badges */
+.badge-category {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.35rem 0.65rem;
+    border-radius: 2rem;
+}
+
+/* Ticket Design */
+.ticket-container {
+    max-width: 650px;
+    margin: 2rem auto;
+    background: #ffffff;
+    border: 2px dashed #cbd5e1;
+    border-radius: 1rem;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    position: relative;
+}
+
+.ticket-header {
+    background: linear-gradient(135deg, #1e3a8a, #2563eb);
+    color: white;
+    padding: 1.5rem;
+}
+
+.ticket-body {
+    padding: 2rem;
+}
+
+.ticket-qr {
+    text-align: center;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 0.75rem;
+    border: 1px solid #e2e8f0;
+}
+
+.ticket-code {
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+    letter-spacing: 2px;
+    font-size: 1.25rem;
+    color: #1e3a8a;
+}
+
+/* Sentiment Badges */
+.sentiment-positive {
+    background-color: #def7ec;
+    color: #03543f;
+    font-weight: 600;
+}
+
+.sentiment-neutral {
+    background-color: #f3f4f6;
+    color: #374151;
+    font-weight: 600;
+}
+
+.sentiment-negative {
+    background-color: #fde8e8;
+    color: #9b1c1c;
+    font-weight: 600;
+}
+
+/* Event Banner Image */
+.event-banner-img {
+    height: 200px;
+    object-fit: cover;
+    width: 100%;
+    border-top-left-radius: 0.85rem;
+    border-top-right-left-radius: 0.85rem;
+}
+
+/* Footer */
+footer {
+    background-color: #0f172a;
+    color: #94a3b8;
+    margin-top: 3rem;
+}

@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.env
+.pytest_cache/
+htmlcov/
+.coverage
+*.log
+static/uploads/event_banners/*
+!static/uploads/event_banners/.gitkeep

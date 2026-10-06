@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: college-event-management
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn wsgi:app --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: MONGODB_URI
+        sync: false
+      - key: DATABASE_NAME
+        value: college_events_db
+      - key: EMAIL_DELIVERY_MODE
+        value: local_demo
+      - key: BUDGET_BREAKDOWN_THRESHOLD
+        value: 10000.0

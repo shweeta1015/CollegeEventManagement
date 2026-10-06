@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Attendee Roster - {{ event.title }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a href="{{ url_for('organizer.dashboard') }}">Organizer</a></li>
+                <li class="breadcrumb-item active">Attendee Roster</li>
+            </ol>
+        </nav>
+        <h3 class="fw-bold mb-0">{{ event.title }} - Attendee Roster</h3>
+        <p class="text-muted small mb-0">{{ attendees | length }} total registered / waitlisted students</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('organizer.checkin_page', event_id=event._id) }}" class="btn btn-success btn-sm">
+            <i class="fas fa-qrcode me-1"></i> Open Check-in Terminal
+        </a>
+        <a href="{{ url_for('api.export_event_csv', event_id=event._id) }}" class="btn btn-outline-primary btn-sm">
+            <i class="fas fa-file-csv me-1"></i> Export Attendees CSV
+        </a>
+    </div>
+</div>
+
+<div class="card custom-card p-4 shadow-sm mb-4">
+    {% if attendees %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Ticket Code</th>
+                        <th>Student Name</th>
+                        <th>Contact Email</th>
+                        <th>Phone</th>
+                        <th>Status</th>
+                        <th>Registered Date</th>
+                        <th>Checked-In Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reg in attendees %}
+                        <tr>
+                            <td><code>{{ reg.ticket_code }}</code></td>
+                            <td><strong>{{ reg.student.full_name }}</strong></td>
+                            <td class="small">{{ reg.student.email }}</td>
+                            <td class="small">{{ reg.student.phone }}</td>
+                            <td>
+                                {% if reg.status == 'checked-in' %}
+                                    <span class="badge bg-success"><i class="fas fa-check-circle me-1"></i> Checked-In</span>
+                                {% elif reg.status == 'registered' %}
+                                    <span class="badge bg-primary">Registered</span>
+                                {% elif reg.status == 'waitlisted' %}
+                                    <span class="badge bg-warning text-dark">Waitlisted</span>
+                                {% elif reg.status == 'cancelled' %}
+                                    <span class="badge bg-danger">Cancelled</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ reg.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="small text-muted">{{ reg.registered_at | datetime_format }}</td>
+                            <td class="small">
+                                {% if reg.check_in_time %}
+                                    <span class="text-success fw-bold">{{ reg.check_in_time | datetime_format }}</span>
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="text-center py-5 text-muted">
+            <i class="fas fa-users-slash fa-3x text-secondary mb-2"></i>
+            <p>No attendees have registered for this event yet.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

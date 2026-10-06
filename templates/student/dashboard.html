@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Dashboard - College Events Portal{% endblock %}
+
+{% block content %}
+<div class="row align-items-center mb-4">
+    <div class="col-md-8">
+        <h2 class="fw-bold mb-1"><i class="fas fa-user-graduate text-primary me-2"></i>Welcome, {{ current_user_name }}!</h2>
+        <p class="text-muted mb-0">Track your event tickets, attend upcoming seminars, and submit feedback.</p>
+    </div>
+    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        <a href="{{ url_for('main.events_catalog') }}" class="btn btn-primary">
+            <i class="fas fa-search me-1"></i> Discover Events
+        </a>
+    </div>
+</div>
+
+<!-- Student Stats Row -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card custom-card p-3 stat-card shadow-sm">
+            <div class="d-flex align-items-center">
+                <div class="rounded-circle bg-primary bg-opacity-10 p-3 text-primary me-3 fs-3">
+                    <i class="fas fa-ticket-alt"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0">{{ metrics.upcoming | length }}</h3>
+                    <p class="text-muted mb-0 small">Active Upcoming Registrations</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card custom-card p-3 stat-card success shadow-sm">
+            <div class="d-flex align-items-center">
+                <div class="rounded-circle bg-success bg-opacity-10 p-3 text-success me-3 fs-3">
+                    <i class="fas fa-check-double"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0">{{ metrics.total_attended }}</h3>
+                    <p class="text-muted mb-0 small">Attended (Checked-In)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card custom-card p-3 stat-card warning shadow-sm">
+            <div class="d-flex align-items-center">
+                <div class="rounded-circle bg-warning bg-opacity-10 p-3 text-warning me-3 fs-3">
+                    <i class="fas fa-history"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0">{{ metrics.total_registered }}</h3>
+                    <p class="text-muted mb-0 small">Lifetime Event Registrations</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upcoming Registered Events Section -->
+<div class="card custom-card p-4 shadow-sm mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="fw-bold mb-0"><i class="fas fa-calendar-check text-primary me-2"></i>My Upcoming Event Tickets</h4>
+        <span class="badge bg-primary">{{ metrics.upcoming | length }} Active</span>
+    </div>
+
+    {% if metrics.upcoming %}
+        <div class="row g-3">
+            {% for item in metrics.upcoming %}
+                {% set ev = item.event %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card border rounded-3 p-3 h-100 d-flex flex-column bg-light">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <span class="badge bg-primary">{{ ev.category }}</span>
+                            {% if item.status == 'registered' %}
+                                <span class="badge bg-success">Confirmed</span>
+                            {% elif item.status == 'waitlisted' %}
+                                <span class="badge bg-warning text-dark">Waitlisted</span>
+                            {% endif %}
+                        </div>
+
+                        <h5 class="fw-bold text-dark mb-1">{{ ev.title }}</h5>
+                        <p class="text-muted small mb-2"><i class="far fa-clock me-1 text-primary"></i>{{ ev.start_time | datetime_format }}</p>
+
+                        {% if item.venue %}
+                            <p class="text-muted small mb-3"><i class="fas fa-map-marker-alt me-1 text-danger"></i>{{ item.venue.name }}</p>
+                        {% endif %}
+
+                        <div class="mt-auto">
+                            <div class="d-flex gap-2">
+                                <a href="{{ url_for('student.view_ticket', registration_id=item._id) }}" class="btn btn-outline-primary btn-sm flex-fill">
+                                    <i class="fas fa-qrcode me-1"></i> QR Ticket
+                                </a>
+                                <form method="POST" action="{{ url_for('student.cancel_reg', registration_id=item._id) }}" onsubmit="return confirm('Cancel this registration?');" class="flex-fill">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                                        <i class="fas fa-times me-1"></i> Cancel
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-4 text-muted">
+            <i class="fas fa-ticket-alt fa-3x text-secondary mb-2"></i>
+            <p>You have no active upcoming event registrations.</p>
+            <a href="{{ url_for('main.events_catalog') }}" class="btn btn-outline-primary btn-sm">Browse Upcoming Events</a>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Attended Events & Feedback Section -->
+<div class="card custom-card p-4 shadow-sm mb-4">
+    <h4 class="fw-bold mb-3"><i class="fas fa-award text-success me-2"></i>Attended Events & Feedback</h4>
+    <p class="text-muted small">Only events where your attendance was verified by the organizer via QR check-in are eligible for feedback submission.</p>
+
+    {% if metrics.attended %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Event Title</th>
+                        <th>Category</th>
+                        <th>Check-In Time</th>
+                        <th>Status</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in metrics.attended %}
+                        <tr>
+                            <td><strong>{{ item.event.title }}</strong></td>
+                            <td><span class="badge bg-secondary">{{ item.event.category }}</span></td>
+                            <td class="small">{{ item.check_in_time | datetime_format }}</td>
+                            <td><span class="badge bg-success"><i class="fas fa-check-circle me-1"></i> Attended</span></td>
+                            <td class="text-end">
+                                <a href="{{ url_for('student.feedback', event_id=item.event._id) }}" class="btn btn-warning btn-sm text-dark fw-bold">
+                                    <i class="fas fa-star me-1"></i> Leave / Edit Feedback
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="text-muted text-center py-3 mb-0">No checked-in attendance records yet. Attend an event and have your ticket scanned to submit feedback!</p>
+    {% endif %}
+</div>
+
+<!-- Interest-Based Recommendations (ADBMS Aggregation Concept) -->
+{% if metrics.recommended_events %}
+    <div class="card custom-card p-4 shadow-sm">
+        <h4 class="fw-bold mb-3"><i class="fas fa-lightbulb text-warning me-2"></i>Recommended For You</h4>
+        <p class="text-muted small">Dynamically recommended based on your past event attendance and category preferences.</p>
+
+        <div class="row g-3">
+            {% for ev in metrics.recommended_events %}
+                <div class="col-md-6 col-lg-3">
+                    <div class="card border rounded-3 p-3 h-100 d-flex flex-column">
+                        <span class="badge bg-info text-dark badge-category align-self-start mb-2">{{ ev.category }}</span>
+                        <h6 class="fw-bold mb-2">{{ ev.title }}</h6>
+                        <small class="text-muted mb-3"><i class="far fa-clock me-1"></i>{{ ev.start_time | date_format }}</small>
+                        <a href="{{ url_for('main.event_detail', event_id=ev._id) }}" class="btn btn-sm btn-outline-primary mt-auto">
+                            View & Register
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

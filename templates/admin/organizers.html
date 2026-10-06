@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block title %}Organizer Verifications - Admin Portal{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h3 class="fw-bold mb-1"><i class="fas fa-id-card text-info me-2"></i>Organizer Verification Queue</h3>
+        <p class="text-muted small mb-0">Verify faculty advisors, departmental leads, and student chapter presidents before they publish events.</p>
+    </div>
+</div>
+
+<div class="card custom-card p-4 shadow-sm">
+    {% if applications %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Organizer Name</th>
+                        <th>College Reg / ID</th>
+                        <th>Department</th>
+                        <th>Advisor / Sponsor</th>
+                        <th>Status</th>
+                        <th>Admin Notes</th>
+                        <th class="text-end">Verification Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app in applications %}
+                        <tr>
+                            <td>
+                                <strong>{{ app.user.full_name }}</strong><br>
+                                <span class="small text-muted">{{ app.user.email }}</span>
+                            </td>
+                            <td><code>{{ app.college_reg_no }}</code></td>
+                            <td>{{ app.department }}</td>
+                            <td class="small">{{ app.faculty_advisor if app.faculty_advisor else 'N/A' }}</td>
+                            <td>
+                                <span class="badge {% if app.status == 'verified' %}bg-success{% elif app.status == 'rejected' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+                                    {{ app.status | upper }}
+                                </span>
+                            </td>
+                            <td class="small text-muted">{{ app.admin_notes }}</td>
+                            <td class="text-end">
+                                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#reviewModal{{ app._id }}">
+                                    <i class="fas fa-edit me-1"></i> Review
+                                </button>
+
+                                <!-- Review Modal -->
+                                <div class="modal fade" id="reviewModal{{ app._id }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog text-start">
+                                        <div class="modal-content">
+                                            <form method="POST" action="{{ url_for('admin.review_organizer', verif_id=app._id) }}">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title fw-bold">Review Organizer Credentials</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p class="mb-2"><strong>Applicant:</strong> {{ app.user.full_name }} ({{ app.user.email }})</p>
+                                                    <p class="mb-3"><strong>Registration No:</strong> <code>{{ app.college_reg_no }}</code> | <strong>Dept:</strong> {{ app.department }}</p>
+
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold small">Decision</label>
+                                                        <select name="status" class="form-select" required>
+                                                            <option value="verified" {% if app.status == 'verified' %}selected{% endif %}>Approve & Verify (Grant Event Publishing Access)</option>
+                                                            <option value="rejected" {% if app.status == 'rejected' %}selected{% endif %}>Reject Application</option>
+                                                        </select>
+                                                    </div>
+
+                                                    <div class="mb-3">
+                                                        <label class="form-label fw-bold small">Administrative Review Notes</label>
+                                                        <textarea name="admin_notes" class="form-control" rows="3" placeholder="Provide reason or confirmation details...">{{ app.admin_notes }}</textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                    <button type="submit" class="btn btn-primary">Save Decision</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="text-center py-5 text-muted">
+            <i class="fas fa-check-circle fa-3x text-secondary mb-2"></i>
+            <p>No pending organizer applications.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

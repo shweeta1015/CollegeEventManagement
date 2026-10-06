@@ -1,0 +1,248 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ event.title }} - College Event Details{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('main.events_catalog') }}">Events</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ event.title }}</li>
+    </ol>
+</nav>
+
+<div class="row g-4">
+    <!-- Main Event Details -->
+    <div class="col-lg-8">
+        <div class="card custom-card overflow-hidden shadow-sm mb-4">
+            {% if event.banner_image %}
+                <img src="{{ url_for('static', filename='uploads/event_banners/' + event.banner_image) }}" class="w-100" style="max-height: 380px; object-fit: cover;" alt="{{ event.title }}">
+            {% else %}
+                <div class="bg-primary bg-opacity-25 text-primary text-center py-5">
+                    <i class="fas fa-calendar-star fa-5x"></i>
+                </div>
+            {% endif %}
+
+            <div class="card-body p-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                    <span class="badge bg-primary fs-6 px-3 py-2 rounded-pill">{{ event.category }}</span>
+                    <span class="badge bg-secondary text-uppercase px-3 py-2">{{ event.status }}</span>
+                </div>
+
+                <h2 class="fw-bold mb-3">{{ event.title }}</h2>
+
+                <!-- Schedule & Venue Info Pills -->
+                <div class="row g-2 mb-4">
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded border">
+                            <div class="text-muted small fw-bold"><i class="far fa-calendar-alt text-primary me-2"></i>Date & Time</div>
+                            <div class="fw-semibold mt-1">{{ event.start_time | datetime_format }}</div>
+                            <div class="text-muted small">to {{ event.end_time | datetime_format }}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 bg-light rounded border">
+                            <div class="text-muted small fw-bold"><i class="fas fa-map-marker-alt text-danger me-2"></i>Location Venue</div>
+                            {% if venue %}
+                                <div class="fw-semibold mt-1">{{ venue.name }} ({{ venue.code }})</div>
+                                <div class="text-muted small">Max Capacity: {{ venue.capacity }} Seats</div>
+                            {% else %}
+                                <div class="text-muted">Venue details unavailable</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Event Description -->
+                <h5 class="fw-bold"><i class="fas fa-align-left text-primary me-2"></i>About This Event</h5>
+                <div class="text-secondary mb-4" style="line-height: 1.8; white-space: pre-line;">
+                    {{ event.description }}
+                </div>
+
+                <!-- Venue Facilities -->
+                {% if venue and venue.facilities %}
+                    <h5 class="fw-bold"><i class="fas fa-concierge-bell text-warning me-2"></i>Venue Facilities</h5>
+                    <div class="d-flex flex-wrap gap-2 mb-4">
+                        {% for fac in venue.facilities %}
+                            <span class="badge bg-light text-dark border px-3 py-2"><i class="fas fa-check text-success me-1"></i> {{ fac }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Budget Breakdown (Visible to Organizer or Admin) -->
+                {% if current_user_role in ['admin', 'organizer'] and event.budget %}
+                    <div class="card p-3 bg-light border-info mb-3">
+                        <h6 class="fw-bold text-info"><i class="fas fa-file-invoice-dollar me-2"></i>Event Budget Overview (Organizer/Admin View)</h6>
+                        <div class="mb-2"><strong>Total Budget:</strong> ₹{{ "{:,.2f}".format(event.budget.total) }}</div>
+                        {% if event.budget.breakdown %}
+                            <ul class="mb-0 small ps-3">
+                                {% for item in event.budget.breakdown %}
+                                    <li>{{ item.item if item.item is defined else item }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Student Feedback & Reviews Section -->
+        <div class="card custom-card p-4 shadow-sm mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="fw-bold mb-0">
+                    <i class="fas fa-star text-warning me-2"></i>Attendee Feedback & Reviews
+                </h4>
+                {% if avg_rating > 0 %}
+                    <span class="badge bg-warning text-dark fs-6 px-3 py-2">
+                        <i class="fas fa-star text-dark me-1"></i> {{ avg_rating }} / 5.0 ({{ feedback_list | length }})
+                    </span>
+                {% endif %}
+            </div>
+
+            {% if current_user_role == 'student' %}
+                {% if user_registration and user_registration.status == 'checked-in' %}
+                    <div class="mb-4 text-end">
+                        <a href="{{ url_for('student.feedback', event_id=event._id) }}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-pen me-1"></i> Submit / Edit My Review
+                        </a>
+                    </div>
+                {% elif user_registration %}
+                    <div class="alert alert-info py-2 small mb-4">
+                        <i class="fas fa-info-circle me-1"></i> Feedback unlocks once your attendance QR ticket is scanned at the venue!
+                    </div>
+                {% endif %}
+            {% endif %}
+
+            {% if feedback_list %}
+                <div class="list-group list-group-flush">
+                    {% for fb in feedback_list %}
+                        <div class="list-group-item px-0 py-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold">{{ fb.student_name }}</span>
+                                <div class="text-warning">
+                                    {% for i in range(1, 6) %}
+                                        <i class="{% if i <= fb.rating %}fas{% else %}far{% endif %} fa-star"></i>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                {% if fb.sentiment_label == 'Positive' %}
+                                    <span class="badge sentiment-positive"><i class="fas fa-smile me-1"></i> Positive</span>
+                                {% elif fb.sentiment_label == 'Constructive/Negative' %}
+                                    <span class="badge sentiment-negative"><i class="fas fa-exclamation-triangle me-1"></i> Constructive</span>
+                                {% else %}
+                                    <span class="badge sentiment-neutral"><i class="fas fa-meh me-1"></i> Neutral</span>
+                                {% endif %}
+                                <span class="text-muted small ms-2">{{ fb.created_at | date_format }}</span>
+                            </div>
+                            <p class="text-muted mb-2 small">{{ fb.comment }}</p>
+
+                            <!-- Organizer Reply -->
+                            {% if fb.organizer_response %}
+                                <div class="p-3 bg-light rounded border-start border-primary border-3 mt-2">
+                                    <div class="small fw-bold text-primary"><i class="fas fa-reply me-1"></i> Organizer Response:</div>
+                                    <div class="small text-secondary mt-1">{{ fb.organizer_response.text }}</div>
+                                </div>
+                            {% elif current_user_role == 'organizer' and current_user_id == event.organizer_id|string %}
+                                <form method="POST" action="{{ url_for('organizer.reply_feedback', feedback_id=fb._id) }}" class="mt-2">
+                                    <div class="input-group input-group-sm">
+                                        <input type="text" name="response_text" class="form-control" placeholder="Reply to this student feedback..." required>
+                                        <button class="btn btn-outline-primary" type="submit">Reply</button>
+                                    </div>
+                                </form>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted text-center py-4 mb-0">No attendee reviews submitted yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Sidebar: Registration Action & Organizer Info -->
+    <div class="col-lg-4">
+        <!-- Registration Card -->
+        <div class="card custom-card p-4 shadow-sm mb-4 sticky-top" style="top: 85px;">
+            <h5 class="fw-bold mb-3"><i class="fas fa-ticket-alt text-primary me-2"></i>Event Registration</h5>
+
+            <div class="mb-3">
+                <div class="d-flex justify-content-between text-muted small mb-1">
+                    <span>Registered Seats</span>
+                    <span><strong>{{ event.registered_count }}</strong> / {{ event.capacity }}</span>
+                </div>
+                {% set percent = (event.registered_count / event.capacity * 100) if event.capacity > 0 else 0 %}
+                <div class="progress" style="height: 8px;">
+                    <div class="progress-bar {% if percent >= 100 %}bg-danger{% else %}bg-primary{% endif %}" role="progressbar" style="width: {{ percent }}%;"></div>
+                </div>
+                {% if event.waitlist_count > 0 %}
+                    <small class="text-warning mt-1 d-block"><i class="fas fa-users-cog me-1"></i> {{ event.waitlist_count }} student(s) currently on priority waitlist.</small>
+                {% endif %}
+            </div>
+
+            <hr>
+
+            <!-- Registration Action Logic -->
+            {% if user_registration %}
+                <div class="alert alert-success p-3 text-center mb-3">
+                    <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                    <h6 class="fw-bold mb-1">You are {{ user_registration.status | upper }}!</h6>
+                    <p class="small text-muted mb-2">Ticket Code: <code>{{ user_registration.ticket_code }}</code></p>
+                    <a href="{{ url_for('student.view_ticket', registration_id=user_registration._id) }}" class="btn btn-success btn-sm w-100">
+                        <i class="fas fa-qrcode me-1"></i> View QR Ticket
+                    </a>
+                </div>
+                <form method="POST" action="{{ url_for('student.cancel_reg', registration_id=user_registration._id) }}" onsubmit="return confirm('Are you sure you want to cancel your registration?');">
+                    <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                        <i class="fas fa-times me-1"></i> Cancel My Registration
+                    </button>
+                </form>
+            {% elif current_user_role == 'student' %}
+                {% if event.status == 'published' and event.start_time > now %}
+                    <form method="POST" action="{{ url_for('student.register', event_id=event._id) }}">
+                        {% if event.registered_count < event.capacity %}
+                            <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold shadow-sm">
+                                <i class="fas fa-check me-2"></i> Register Now (Free)
+                            </button>
+                        {% else %}
+                            <button type="submit" class="btn btn-warning btn-lg w-100 fw-bold shadow-sm text-dark">
+                                <i class="fas fa-clock me-2"></i> Join Priority Waitlist
+                            </button>
+                            <small class="text-muted d-block text-center mt-2">Capacity reached. You will automatically receive a seat if an attendee cancels.</small>
+                        {% endif %}
+                    </form>
+                {% else %}
+                    <button class="btn btn-secondary w-100" disabled>Registration Closed</button>
+                {% endif %}
+            {% elif current_user_id %}
+                <div class="alert alert-light border text-center small">
+                    Signed in as <strong>{{ current_user_role }}</strong>. Student account required to register for events.
+                </div>
+            {% else %}
+                <div class="text-center">
+                    <p class="small text-muted mb-3">Sign in with your student account to register and receive your QR ticket code.</p>
+                    <a href="{{ url_for('auth.login', next=request.path) }}" class="btn btn-primary w-100 fw-bold">
+                        <i class="fas fa-sign-in-alt me-2"></i> Sign In to Register
+                    </a>
+                </div>
+            {% endif %}
+
+            <hr class="my-4">
+
+            <!-- Organizer Contact Box -->
+            <div class="organizer-box">
+                <h6 class="fw-bold mb-2"><i class="fas fa-user-shield text-secondary me-2"></i>Organized By</h6>
+                {% if organizer %}
+                    <p class="mb-1 fw-semibold">{{ organizer.full_name }}</p>
+                    <p class="small text-muted mb-0"><i class="fas fa-envelope me-1"></i> {{ organizer.email }}</p>
+                    {% if organizer.phone %}
+                        <p class="small text-muted mb-0"><i class="fas fa-phone me-1"></i> {{ organizer.phone }}</p>
+                    {% endif %}
+                {% else %}
+                    <p class="small text-muted">College Event Committee</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

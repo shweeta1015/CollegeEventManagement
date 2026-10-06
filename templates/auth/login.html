@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign In - College Events Portal{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+    <div class="col-md-7 col-lg-5">
+        <div class="card custom-card p-4 p-md-5 shadow-sm">
+            <div class="text-center mb-4">
+                <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex p-3 text-primary mb-2">
+                    <i class="fas fa-lock fa-2x"></i>
+                </div>
+                <h3 class="fw-bold">Sign In</h3>
+                <p class="text-muted small">Access your events dashboard and tickets</p>
+            </div>
+
+            <!-- Demo Evaluator Quick Fill Bar -->
+            <div class="alert alert-light border p-3 mb-4">
+                <div class="small fw-bold text-secondary mb-2"><i class="fas fa-magic text-warning me-1"></i> Quick Demo Logins (ADBMS Project):</div>
+                <div class="d-flex flex-wrap gap-1">
+                    <button type="button" class="btn btn-outline-danger btn-sm btn-fill-demo flex-fill" data-email="admin@college.edu" data-password="Admin@123">
+                        <i class="fas fa-shield-alt"></i> Admin
+                    </button>
+                    <button type="button" class="btn btn-outline-info btn-sm btn-fill-demo flex-fill" data-email="organizer1@college.edu" data-password="Organizer@123">
+                        <i class="fas fa-user-tie"></i> Organizer
+                    </button>
+                    <button type="button" class="btn btn-outline-success btn-sm btn-fill-demo flex-fill" data-email="student1@college.edu" data-password="Student@123">
+                        <i class="fas fa-user-graduate"></i> Student
+                    </button>
+                </div>
+            </div>
+
+            <form method="POST" action="{{ url_for('auth.login', next=request.args.get('next')) }}">
+                <div class="mb-3">
+                    <label class="form-label fw-bold small">Email Address</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><i class="fas fa-envelope text-muted"></i></span>
+                        <input type="email" id="email" name="email" class="form-control" placeholder="user@college.edu" value="{{ email if email else '' }}" required>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold small">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><i class="fas fa-key text-muted"></i></span>
+                        <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">
+                    <i class="fas fa-sign-in-alt me-2"></i> Authenticate & Enter
+                </button>
+            </form>
+
+            <hr class="my-4">
+
+            <div class="text-center small">
+                Don't have an account? <a href="{{ url_for('auth.register') }}" class="fw-bold">Register as Student or Organizer</a><br>
+                Need to verify email? <a href="{{ url_for('auth.verify_email') }}">Enter Verification Token</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

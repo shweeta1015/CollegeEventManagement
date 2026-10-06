@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+
+{% block title %}Organizer Portal - College Events{% endblock %}
+
+{% block content %}
+<div class="row align-items-center mb-4">
+    <div class="col-md-8">
+        <h2 class="fw-bold mb-1"><i class="fas fa-tasks text-info me-2"></i>Organizer Console</h2>
+        <p class="text-muted mb-0">Manage your college events, monitor registrations, check in attendees, and review feedback.</p>
+    </div>
+    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+        {% if is_verified %}
+            <a href="{{ url_for('organizer.new_event') }}" class="btn btn-primary fw-bold shadow-sm">
+                <i class="fas fa-plus-circle me-1"></i> Create New Event
+            </a>
+        {% else %}
+            <button class="btn btn-secondary" disabled title="Account awaiting admin verification">
+                <i class="fas fa-lock me-1"></i> Verification Pending
+            </button>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Organizer Verification Banner -->
+{% if not is_verified %}
+    <div class="alert alert-warning p-3 shadow-sm mb-4">
+        <div class="d-flex align-items-center">
+            <i class="fas fa-exclamation-triangle fa-2x text-warning me-3"></i>
+            <div>
+                <h6 class="fw-bold mb-1">Organizer Account Under Administrative Verification</h6>
+                <p class="small text-secondary mb-0">
+                    {{ verif_msg }} Your profile must be reviewed and approved by the college administrator before you can publish events to students. You can review your credentials in <a href="{{ url_for('auth.profile') }}">Profile Settings</a>.
+                </p>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+<!-- Stats Cards Row -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card custom-card p-3 stat-card shadow-sm">
+            <div class="d-flex align-items-center">
+                <div class="rounded-circle bg-primary bg-opacity-10 p-3 text-primary me-3 fs-3">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0">{{ metrics.total_events }}</h3>
+                    <p class="text-muted mb-0 small">Events Organized</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card custom-card p-3 stat-card success shadow-sm">
+            <div class="d-flex align-items-center">
+                <div class="rounded-circle bg-success bg-opacity-10 p-3 text-success me-3 fs-3">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0">{{ metrics.total_registrations }}</h3>
+                    <p class="text-muted mb-0 small">Total Registrations</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card custom-card p-3 stat-card warning shadow-sm">
+            <div class="d-flex align-items-center">
+                <div class="rounded-circle bg-warning bg-opacity-10 p-3 text-warning me-3 fs-3">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0">{{ metrics.checked_in_count }}</h3>
+                    <p class="text-muted mb-0 small">Attendees Checked-In</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card custom-card p-3 stat-card danger shadow-sm">
+            <div class="d-flex align-items-center">
+                <div class="rounded-circle bg-danger bg-opacity-10 p-3 text-danger me-3 fs-3">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0">{{ metrics.feedback_summary.avg_rating }} / 5.0</h3>
+                    <p class="text-muted mb-0 small">Avg. Feedback Score</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Managed Events Table -->
+<div class="card custom-card p-4 shadow-sm mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="fw-bold mb-0"><i class="fas fa-list-alt text-primary me-2"></i>My Organized Events</h4>
+        <span class="badge bg-secondary">{{ metrics.events | length }} Event{{ 's' if metrics.events|length != 1 else '' }}</span>
+    </div>
+
+    {% if metrics.events %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Title & Category</th>
+                        <th>Venue</th>
+                        <th>Schedule</th>
+                        <th>Capacity / Reg</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ev in metrics.events %}
+                        <tr>
+                            <td>
+                                <strong>{{ ev.title }}</strong><br>
+                                <span class="badge bg-light text-primary border small">{{ ev.category }}</span>
+                            </td>
+                            <td>
+                                {% if ev.venue %}
+                                    <small>{{ ev.venue.name }}<br><span class="text-muted">({{ ev.venue.code }})</span></small>
+                                {% else %}
+                                    <span class="text-muted small">N/A</span>
+                                {% endif %}
+                            </td>
+                            <td class="small">{{ ev.start_time | datetime_format }}</td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="progress flex-grow-1" style="height: 6px; width: 60px;">
+                                        {% set percent = (ev.registered_count / ev.capacity * 100) if ev.capacity > 0 else 0 %}
+                                        <div class="progress-bar {% if percent >= 100 %}bg-danger{% else %}bg-primary{% endif %}" style="width: {{ percent }}%;"></div>
+                                    </div>
+                                    <small><strong>{{ ev.registered_count }}</strong>/{{ ev.capacity }}</small>
+                                </div>
+                                {% if ev.waitlist_count > 0 %}
+                                    <small class="text-warning d-block">{{ ev.waitlist_count }} waitlisted</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge {% if ev.status == 'published' %}bg-success{% elif ev.status == 'pending_approval' %}bg-warning text-dark{% elif ev.status == 'archived' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                    {{ ev.status }}
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{ url_for('organizer.checkin_page', event_id=ev._id) }}" class="btn btn-outline-success" title="QR Check-in Console">
+                                        <i class="fas fa-qrcode"></i> Check-in
+                                    </a>
+                                    <a href="{{ url_for('organizer.attendees_roster', event_id=ev._id) }}" class="btn btn-outline-info" title="Attendee List & CSV">
+                                        <i class="fas fa-users"></i>
+                                    </a>
+                                    <a href="{{ url_for('organizer.edit_event', event_id=ev._id) }}" class="btn btn-outline-primary" title="Edit Event">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form method="POST" action="{{ url_for('organizer.send_reminders', event_id=ev._id) }}" class="d-inline" onsubmit="return confirm('Dispatch reminder notifications to all confirmed attendees?');">
+                                        <button type="submit" class="btn btn-outline-warning" title="Dispatch Reminders (Demo Trigger)">
+                                            <i class="fas fa-bell"></i>
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="{{ url_for('organizer.archive_event', event_id=ev._id) }}" class="d-inline" onsubmit="return confirm('Archive this event? Attendees will be notified.');">
+                                        <button type="submit" class="btn btn-outline-danger" title="Archive Event">
+                                            <i class="fas fa-archive"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="text-center py-4 text-muted">
+            <i class="fas fa-calendar-plus fa-3x text-secondary mb-2"></i>
+            <p>You haven't created any events yet.</p>
+            {% if is_verified %}
+                <a href="{{ url_for('organizer.new_event') }}" class="btn btn-primary btn-sm">Create Your First Event</a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+
+<!-- Analytics & Promotion Effectiveness -->
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card custom-card p-4 shadow-sm h-100">
+            <h5 class="fw-bold mb-3"><i class="fas fa-comments text-primary me-2"></i>Feedback Sentiment Summary</h5>
+            <div class="row g-2 text-center mb-3">
+                <div class="col-4">
+                    <div class="p-3 bg-light rounded border">
+                        <h4 class="text-success fw-bold mb-0">{{ metrics.feedback_summary.positive_count }}</h4>
+                        <small class="text-muted">Positive</small>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="p-3 bg-light rounded border">
+                        <h4 class="text-secondary fw-bold mb-0">{{ metrics.feedback_summary.neutral_count }}</h4>
+                        <small class="text-muted">Neutral</small>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="p-3 bg-light rounded border">
+                        <h4 class="text-danger fw-bold mb-0">{{ metrics.feedback_summary.negative_count }}</h4>
+                        <small class="text-muted">Constructive</small>
+                    </div>
+                </div>
+            </div>
+            <p class="small text-muted mb-0">Total reviews submitted across your events: <strong>{{ metrics.feedback_summary.total_feedback }}</strong></p>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card custom-card p-4 shadow-sm h-100">
+            <h5 class="fw-bold mb-1"><i class="fas fa-bullhorn text-warning me-2"></i>Promotion Effectiveness</h5>
+            <small class="text-muted d-block mb-3">{{ metrics.demo_promotion_tracking.notice }}</small>
+
+            {% for ch in metrics.demo_promotion_tracking.channels %}
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between small fw-bold mb-1">
+                        <span>{{ ch.source }}</span>
+                        <span>{{ ch.percentage }}%</span>
+                    </div>
+                    <div class="progress" style="height: 7px;">
+                        <div class="progress-bar bg-info" style="width: {{ ch.percentage }}%;"></div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

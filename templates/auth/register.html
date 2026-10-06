@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Account - College Events Portal{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4">
+    <div class="col-md-8 col-lg-6">
+        <div class="card custom-card p-4 p-md-5 shadow-sm">
+            <div class="text-center mb-4">
+                <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex p-3 text-primary mb-2">
+                    <i class="fas fa-user-plus fa-2x"></i>
+                </div>
+                <h3 class="fw-bold">Create New Account</h3>
+                <p class="text-muted small">Register as a Student attendee or Club/Department Organizer</p>
+            </div>
+
+            <form method="POST" action="{{ url_for('auth.register') }}">
+                <!-- Role Selection -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold small">Select Account Role</label>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <input type="radio" class="btn-check" name="role" id="role_student" value="student" {% if not role or role == 'student' %}checked{% endif %} onchange="toggleOrgFields(false)">
+                            <label class="btn btn-outline-primary w-100 py-2" for="role_student">
+                                <i class="fas fa-user-graduate d-block mb-1 fs-5"></i> Student
+                            </label>
+                        </div>
+                        <div class="col-6">
+                            <input type="radio" class="btn-check" name="role" id="role_organizer" value="organizer" {% if role == 'organizer' %}checked{% endif %} onchange="toggleOrgFields(true)">
+                            <label class="btn btn-outline-info w-100 py-2" for="role_organizer">
+                                <i class="fas fa-user-tie d-block mb-1 fs-5"></i> Event Organizer
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold small">Full Name</label>
+                    <input type="text" name="full_name" class="form-control" placeholder="e.g., Alex Johnson" value="{{ full_name if full_name else '' }}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold small">Email Address</label>
+                    <input type="email" name="email" class="form-control" placeholder="name@college.edu" value="{{ email if email else '' }}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold small">Phone Number (10–15 digits, optional + prefix)</label>
+                    <input type="tel" name="phone" class="form-control" placeholder="+919876543210" value="{{ phone if phone else '' }}" required>
+                </div>
+
+                <!-- Organizer-Specific Verification Fields -->
+                <div id="organizerFields" class="p-3 bg-light rounded border mb-3 {% if role != 'organizer' %}d-none{% endif %}">
+                    <h6 class="fw-bold text-info mb-2"><i class="fas fa-id-card me-1"></i> Organizer Verification Info</h6>
+                    <div class="mb-2">
+                        <label class="form-label small">College Registration / Employee Number</label>
+                        <input type="text" name="reg_no" class="form-control form-control-sm" placeholder="e.g., FAC-CS-2024 or STU-CLUB-01">
+                    </div>
+                    <div>
+                        <label class="form-label small">Academic Department / Club Name</label>
+                        <input type="text" name="department" class="form-control form-control-sm" placeholder="e.g., Computer Science / Robotics Club">
+                    </div>
+                    <small class="text-muted d-block mt-2">Note: Organizers must be verified by the Admin before publishing events.</small>
+                </div>
+
+                <div class="row g-2 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold small">Password (Min. 6 chars)</label>
+                        <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold small">Confirm Password</label>
+                        <input type="password" name="confirm_password" class="form-control" placeholder="••••••••" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">
+                    <i class="fas fa-user-check me-2"></i> Register Account
+                </button>
+            </form>
+
+            <hr class="my-4">
+
+            <div class="text-center small">
+                Already registered? <a href="{{ url_for('auth.login') }}" class="fw-bold">Sign In here</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function toggleOrgFields(show) {
+    const orgDiv = document.getElementById("organizerFields");
+    if (show) {
+        orgDiv.classList.remove("d-none");
+    } else {
+        orgDiv.classList.add("d-none");
+    }
+}
+</script>
+{% endblock %}

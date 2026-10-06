@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Discover & Participate in Campus Events{% endblock %}
+
+{% block content %}
+<!-- Hero Banner -->
+<div class="hero-banner shadow-sm text-center">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <span class="badge bg-light text-primary px-3 py-2 rounded-pill fw-bold mb-3">
+                <i class="fas fa-university me-1"></i> Official Campus Events Portal
+            </span>
+            <h1 class="display-4 fw-bold mb-3">Connect, Learn, and Celebrate Campus Life</h1>
+            <p class="lead text-light mb-4">
+                Explore academic seminars, coding hackathons, cultural festivals, and technical workshops. Reserve your seat atomically with verified QR ticketing.
+            </p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{{ url_for('main.events_catalog') }}" class="btn btn-warning btn-lg px-4 fw-bold text-dark">
+                    <i class="fas fa-search me-2"></i> Browse Events
+                </a>
+                {% if not current_user_id %}
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-outline-light btn-lg px-4">
+                        <i class="fas fa-user-plus me-2"></i> Join as Student/Organizer
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Metrics Quick Bar -->
+<div class="row g-3 mb-5">
+    <div class="col-md-4">
+        <div class="card custom-card p-3 stat-card shadow-sm h-100">
+            <div class="d-flex align-items-center">
+                <div class="rounded-circle bg-primary bg-opacity-10 p-3 text-primary me-3 fs-3">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0">{{ total_events }}</h3>
+                    <p class="text-muted mb-0 small">Campus Events Organized</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card custom-card p-3 stat-card success shadow-sm h-100">
+            <div class="d-flex align-items-center">
+                <div class="rounded-circle bg-success bg-opacity-10 p-3 text-success me-3 fs-3">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0">{{ total_registrations }}</h3>
+                    <p class="text-muted mb-0 small">Student Registrations</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card custom-card p-3 stat-card warning shadow-sm h-100">
+            <div class="d-flex align-items-center">
+                <div class="rounded-circle bg-warning bg-opacity-10 p-3 text-warning me-3 fs-3">
+                    <i class="fas fa-building"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0">{{ total_venues }}</h3>
+                    <p class="text-muted mb-0 small">Equipped College Venues</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Category Quick Filter -->
+<div class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="fw-bold mb-0"><i class="fas fa-th-large text-primary me-2"></i>Event Categories</h4>
+        <a href="{{ url_for('main.events_catalog') }}" class="text-decoration-none fw-semibold">View All <i class="fas fa-arrow-right"></i></a>
+    </div>
+    <div class="row g-3">
+        {% for cat in categories %}
+            <div class="col-6 col-md-4 col-lg-2">
+                <a href="{{ url_for('main.events_catalog', category=cat) }}" class="card custom-card text-center p-3 text-decoration-none text-dark h-100">
+                    <div class="fs-2 text-primary mb-2">
+                        {% if cat == 'Academic' %}<i class="fas fa-book-reader"></i>
+                        {% elif cat == 'Cultural' %}<i class="fas fa-music"></i>
+                        {% elif cat == 'Sports' %}<i class="fas fa-running"></i>
+                        {% elif cat == 'Social' %}<i class="fas fa-hands-helping"></i>
+                        {% elif cat == 'Workshop' %}<i class="fas fa-laptop-code"></i>
+                        {% else %}<i class="fas fa-chalkboard-teacher"></i>
+                        {% endif %}
+                    </div>
+                    <span class="fw-semibold small">{{ cat }}</span>
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Featured Events Grid -->
+<div class="mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold mb-0"><i class="fas fa-fire text-danger me-2"></i>Featured Upcoming Events</h3>
+        <a href="{{ url_for('main.events_catalog') }}" class="btn btn-outline-primary btn-sm">Explore Full Catalog</a>
+    </div>
+
+    <div class="row g-4">
+        {% if featured_events %}
+            {% for event in featured_events %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card custom-card h-100 shadow-sm overflow-hidden d-flex flex-column">
+                        {% if event.banner_image %}
+                            <img src="{{ url_for('static', filename='uploads/event_banners/' + event.banner_image) }}" class="event-banner-img" alt="{{ event.title }}">
+                        {% else %}
+                            <div class="bg-primary bg-opacity-25 d-flex align-items-center justify-content-center text-primary" style="height: 160px;">
+                                <i class="fas fa-calendar-star fa-3x"></i>
+                            </div>
+                        {% endif %}
+
+                        <div class="card-body d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge bg-primary badge-category">{{ event.category }}</span>
+                                <span class="badge bg-secondary small">
+                                    <i class="fas fa-chair me-1"></i> {{ event.registered_count }} / {{ event.capacity }}
+                                </span>
+                            </div>
+
+                            <h5 class="card-title fw-bold text-dark text-truncate-2">{{ event.title }}</h5>
+                            <p class="card-text text-muted small flex-grow-1" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                                {{ event.description }}
+                            </p>
+
+                            <hr class="my-2">
+                            <div class="small text-muted mb-3">
+                                <div><i class="far fa-clock text-primary me-2"></i>{{ event.start_time | datetime_format }}</div>
+                                {% if event.venue %}
+                                    <div><i class="fas fa-map-marker-alt text-danger me-2"></i>{{ event.venue.name }}</div>
+                                {% endif %}
+                            </div>
+
+                            <a href="{{ url_for('main.event_detail', event_id=event._id) }}" class="btn btn-primary w-100 mt-auto">
+                                <i class="fas fa-info-circle me-1"></i> View Details & Register
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center py-5 text-muted">
+                <i class="fas fa-calendar-times fa-3x mb-3 text-secondary"></i>
+                <p class="lead">No published events currently available. Check back soon!</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
