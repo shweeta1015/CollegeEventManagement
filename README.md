@@ -1,77 +1,99 @@
-# College Event Management System (ADBMS Project)
+# College Event Management System
 
-[![Python](https://img.shields.io/badge/Python-3.14%2B-blue.svg)](https://www.python.org/)
-[![Flask](https://img.shields.io/badge/Flask-3.1-black.svg)](https://flask.palletsprojects.com/)
-[![MongoDB](https://img.shields.io/badge/MongoDB-NoSQL-green.svg)](https://www.mongodb.com/)
-[![Tests](https://img.shields.io/badge/Tests-Pytest%20Passing-brightgreen.svg)]()
+> **Full-Stack Campus Event Portal built with Python Flask, MongoDB NoSQL, Chart.js, and QR Ticketing for Advanced Database Management Systems (ADBMS).**
 
-A complete, production-grade full-stack web application designed for academic evaluation in **Advanced Database Management Systems (ADBMS)**. This portal showcases the architecture, querying power, data modeling, concurrency guarantees, and indexing mechanisms of **MongoDB NoSQL** using **Python Flask** and **PyMongo**.
+---
+
+## Overview
+
+The **College Event Management System** is a complete, production-grade web application engineered to demonstrate modern NoSQL database design, high-concurrency handling, and server-side aggregation pipelines using **MongoDB** and **Flask**.
+
+The platform provides dedicated workflows for **Administrators**, **Event Organizers**, and **Students**, featuring atomic capacity reservations, paperless QR ticketing, post-event feedback analysis, and real-time analytical dashboards.
 
 ---
 
 ## Table of Contents
-1. [Key Features by Role](#key-features-by-role)
-2. [ADBMS & MongoDB NoSQL Concepts Demonstrated](#adbms--mongodb-nosql-concepts-demonstrated)
-3. [MongoDB Data Model & Schema Design](#mongodb-data-model--schema-design)
-4. [Tech Stack](#tech-stack)
-5. [Windows Setup & Installation](#windows-setup--installation)
-6. [Demo Accounts & Credentials](#demo-accounts--credentials)
-7. [API Endpoints Reference](#api-endpoints-reference)
-8. [Automated Testing](#automated-testing)
-9. [Cloud Deployment Guide (Render, Railway, Atlas)](#cloud-deployment-guide)
-10. [College Viva & Presentation Guide](#college-viva--presentation-guide)
+
+- [Core Features by Role](#core-features-by-role)
+- [ADBMS & MongoDB NoSQL Concepts](#adbms--mongodb-nosql-concepts)
+- [Database Schema & Data Model](#database-schema--data-model)
+- [Technology Stack](#technology-stack)
+- [Quick Start Guide](#quick-start-guide)
+- [Demo Credentials](#demo-credentials)
+- [API Endpoints Reference](#api-endpoints-reference)
+- [Automated Testing](#automated-testing)
+- [Cloud Deployment](#cloud-deployment)
+- [College Viva & Presentation Guide](#college-viva--presentation-guide)
 
 ---
 
-## 1. Key Features by Role
+## Core Features by Role
 
-### 🛡️ Admin
-- **System-Wide Dashboard**: Real-time KPI counters (events, registrations, active users, attendance percentage) visualized with interactive **Chart.js** graphs.
-- **Organizer Verification Queue**: Inspect incoming organizer applications (department, university registration number, faculty advisor) and verify/reject event-publishing privileges.
-- **Event Approvals & Archival**: Review pending event proposals, approve, reject with feedback notes, or soft-archive.
-- **Campus Venue Management**: Create and configure auditoriums, seminar halls, and open-air amphitheatres with seating capacity limits and facility tags.
-- **Analytics & Aggregation Reports**: Multi-stage aggregation reports covering event category popularity, venue utilization, attendance ratios, and system activity with **CSV export**.
-- **Security Audit Logs**: Immutable audit log recording every administrative/organizer action (actor, role, action, target collection, IP, timestamp).
-- **Platform Suggestions**: Review and respond to student/organizer suggestions.
+### 🛡️ Administrator
+- **System-Wide Dashboard**: Real-time KPI counters (active events, bookings, registered users, overall attendance rate) visualized with interactive **Chart.js** graphs.
+- **Organizer Verification Queue**: Review faculty and club lead credentials (college registration number, department, advisor) before granting event-publishing privileges.
+- **Event Approvals & Archival**: Approve pending event drafts, reject with review feedback, or soft-archive completed events.
+- **Venue Management**: Configure campus auditoriums, labs, and open grounds with capacity ceilings and facility tags.
+- **Analytics & Aggregation Reports**: Multi-stage aggregation pipelines generating category popularity, venue utilization, and system activity metrics with **one-click CSV export**.
+- **Security Audit Logs**: Immutable audit trail tracking every administrative action (actor, role, action, target collection, IP, timestamp).
+- **Platform Suggestions**: Review and reply to student and organizer feedback.
 
-### 📋 Organizer
-- **Event Creation & Management**: Create events with category, venue, schedule, markdown description, budget breakdown (mandatory above ₹10,000 threshold), and banner image upload with auto-resize.
-- **Strict Verification Gate**: Only verified and approved organizers can create or publish events.
-- **Attendee Roster & CSV Export**: Inspect registered, waitlisted, and checked-in students with real-time status badges and one-click CSV download.
-- **QR Code Check-In Console**: Interactive check-in terminal supporting handheld barcode scanners or manual ticket code entry. Features live async validation, instant student identification, and strict double-check-in prevention.
-- **Attendee Reminders**: Trigger reminder notifications dispatched to all confirmed attendees.
-- **Feedback Management**: View attendee reviews, star ratings, and sentiment tags; reply directly to student feedback.
+### 📋 Event Organizer
+- **Event Creation & Management**: Create events with categories, venues, schedules, rich markdown descriptions, banner image upload (with auto-compression), and budget breakdowns.
+- **Verification Gate**: Only verified organizers approved by the administrator can publish events to students.
+- **Attendee Roster & CSV Export**: Real-time roster of confirmed, waitlisted, and checked-in students with CSV download.
+- **QR Check-In Console**: Live verification console supporting handheld barcode scanners or manual ticket entry with instant duplicate check-in prevention.
+- **Automated Reminders**: Trigger reminder notifications to all confirmed attendees.
+- **Feedback & Sentiment Review**: Inspect student ratings and keyword-categorized sentiment tags; post replies directly to student reviews.
 
 ### 🎓 Student
-- **Event Discovery**: Search and filter upcoming events by category, date range, and keywords with visual capacity progress bars.
-- **Atomic Registration & Waitlisting**: Safe seat booking preventing overbooking. Automatic placement on priority waitlist when an event reaches capacity.
-- **Waitlist Auto-Promotion**: When a registered student cancels, the oldest waitlisted student is atomically promoted to confirmed registration and immediately notified.
-- **Digital QR Ticket**: Unique QR code boarding pass generated per registration with base64 data URI rendering and printable ticket view.
-- **Attendance-Gated Feedback**: Only students who checked in at the venue can rate (1–5 stars) and review events.
-- **Keyword Sentiment Demo**: Rule-based sentiment analysis categorizing feedback comments as Positive, Neutral, or Constructive.
-- **In-App Notification Center**: Notifications for booking confirmation, waitlist promotion, cancellations, reminders, and organizer replies with read/unread, archive, and delete operations.
+- **Event Discovery**: Search and filter upcoming campus events by category, date range, or keywords with live capacity progress bars.
+- **Atomic Registration**: Instant seat reservation protected against overbooking. If an event is full, the student is automatically queued on a priority waitlist.
+- **Waitlist Auto-Promotion**: When a registered student cancels, the oldest waitlisted attendee is atomically promoted to confirmed status and notified immediately.
+- **Digital QR Ticket**: Unique QR code boarding pass generated per registration with base64 PNG rendering and a printable ticket layout.
+- **Attendance-Gated Feedback**: Only students who checked in at the venue can submit ratings (1–5 stars) and reviews.
+- **Keyword Sentiment Demo**: Rule-based categorization tagging comments as *Positive*, *Neutral*, or *Constructive*.
+- **In-App Notification Center**: Notifications for booking confirmations, waitlist promotions, schedule reminders, and cancellations with mark-as-read and archival controls.
 
 ---
 
-## 2. ADBMS & MongoDB NoSQL Concepts Demonstrated
+## ADBMS & MongoDB NoSQL Concepts
 
-| Concept | Implementation in Project | Why it matters |
+| ADBMS Principle | Implementation in Project | Technical Justification |
 | :--- | :--- | :--- |
-| **Referencing vs. Embedding** | References (`ObjectId`) used for `users`, `events`, `registrations`, `venues`. Embedding used for budget items, feedback responses, and facility lists. | Avoids the 16MB document size limit for unbounded relationships while exploiting fast single-document read locality for bounded subdocuments. |
-| **Atomicity & Concurrency Control** | `find_one_and_update` with `{ registered_count: { $lt: capacity } }` and `{ $inc: { registered_count: 1 } }`. | Prevents race conditions and overbooking under high concurrent traffic without heavy distributed locking. |
-| **Indexing Strategies** | Unique indexes on `users.email`, `venues.code`, `registrations.ticket_code`. Compound index on `events (organizer_id, start_time)` and `registrations (event_id, student_id)`. | Accelerates multi-field queries, enforces business uniqueness at the database engine level, and eliminates costly in-memory sorts (`COLLSCAN` vs `IXSCAN`). |
-| **Aggregation Pipeline** | Multi-stage aggregation pipelines: `$match` &rarr; `$lookup` &rarr; `$unwind` &rarr; `$group` &rarr; `$project` &rarr; `$sort`. | Demonstrates server-side analytics, computing attendance percentage: `(checked_in / total_pool) * 100`, category distribution, and venue utilization without pulling raw documents into RAM. |
-| **Soft Deletions & Auditing** | `status: "archived"` for events; `is_active: False` for users; comprehensive `audit_logs` collection. | Preserves historical referential integrity, historical rosters, and satisfies security compliance guidelines. |
-| **Flexible Deployment Architecture** | Dual engine support: Native MongoDB connection (local or Atlas) with seamless automatic fallback to `mongomock` in-memory engine. | Ensures zero crashes on evaluation machines lacking a running MongoDB daemon while connecting seamlessly to real clusters when configured. |
+| **Referencing vs. Embedding** | References (`ObjectId`) used for `users`, `events`, `registrations`, `venues`. Embedding used for budget items, feedback responses, and facility lists. | Avoids the 16MB document size limit for unbounded attendee growth while maximizing fast read locality for bounded subdocuments. |
+| **Atomic Concurrency Control** | `find_one_and_update` with `{ registered_count: { $lt: capacity } }` and `{ $inc: { registered_count: 1 } }`. | Eliminates race conditions and overbooking under simultaneous registrations without heavy distributed database locking. |
+| **FIFO Waitlist Queue** | Atomic update query sorted by `registered_at: 1` promoting the oldest record when an active attendee cancels. | Demonstrates transactional-style state transitions using atomic single-document updates. |
+| **Indexing Strategies** | Unique indexes on `users.email`, `venues.code`, `registrations.ticket_code`. Compound indexes on `events(organizer_id, start_time)` and `feedback(event_id, student_id)`. | Enforces business constraints at the database engine level and avoids expensive in-memory collection scans (`COLLSCAN` &rarr; `IXSCAN`). |
+| **Aggregation Pipelines** | Multi-stage aggregation pipelines: `$match` &rarr; `$lookup` &rarr; `$unwind` &rarr; `$group` &rarr; `$project` &rarr; `$sort`. | Executes complex server-side data transformations and attendance analytics without loading raw documents into application RAM. |
+| **Soft Deletions & Auditing** | `status: "archived"` for events; `is_active: False` for users; comprehensive `audit_logs` collection. | Preserves historical referential integrity and maintains an immutable security audit trail. |
+| **Flexible Architecture** | Dual-engine support: native MongoDB (local or Atlas) with seamless fallback to in-memory `mongomock`. | Enables immediate zero-dependency testing during academic evaluations while remaining fully compatible with real cloud clusters. |
 
 ---
 
-## 3. MongoDB Data Model & Schema Design
+## Database Schema & Data Model
 
-### 1. `users`
+### Collections Overview
+
+```text
+college_events_db
+├── users                     (User accounts, hashed passwords, roles)
+├── organizer_verifications   (Verification requests, department, faculty advisor)
+├── venues                    (Auditoriums, capacity limits, facilities)
+├── events                    (Event schedule, capacity counters, budget)
+├── registrations             (Tickets, attendee state, check-in timestamps)
+├── feedback                  (Ratings, comments, sentiment labels, replies)
+├── notifications             (In-app user alerts, read/archive status)
+├── platform_suggestions      (User suggestions and administrator replies)
+└── audit_logs                (Immutable security & action audit logs)
+```
+
+### Sample Document Structures
+
+#### `users` Collection
 ```json
 {
-  "_id": ObjectId("..."),
+  "_id": "ObjectId('6701a1b2c3d4e5f6a7b8c901')",
   "email": "student1@college.edu",
   "password_hash": "scrypt:32768:8:1$...",
   "full_name": "Rahul Sharma",
@@ -79,22 +101,20 @@ A complete, production-grade full-stack web application designed for academic ev
   "phone": "+919876543221",
   "is_active": true,
   "email_verified": true,
-  "verification_token": null,
-  "created_at": ISODate("2026-09-01T10:00:00Z")
+  "created_at": "2026-09-01T10:00:00Z"
 }
 ```
 
-### 2. `events`
+#### `events` Collection
 ```json
 {
-  "_id": ObjectId("..."),
-  "title": "National Hackathon 2026: GenAI & Distributed NoSQL Systems",
-  "organizer_id": ObjectId("..."),
-  "venue_id": ObjectId("..."),
-  "description": "Join the premier 24-hour collegiate hackathon...",
+  "_id": "ObjectId('6701a1b2c3d4e5f6a7b8c902')",
+  "title": "National Hackathon 2026: GenAI & Distributed Systems",
+  "organizer_id": "ObjectId('6701a1b2c3d4e5f6a7b8c900')",
+  "venue_id": "ObjectId('6701a1b2c3d4e5f6a7b8c910')",
   "category": "Workshop",
-  "start_time": ISODate("2026-10-05T10:00:00Z"),
-  "end_time": ISODate("2026-10-05T16:00:00Z"),
+  "start_time": "2026-10-15T10:00:00Z",
+  "end_time": "2026-10-15T16:00:00Z",
   "capacity": 50,
   "registered_count": 2,
   "waitlist_count": 0,
@@ -104,173 +124,143 @@ A complete, production-grade full-stack web application designed for academic ev
     "total": 25000.0,
     "breakdown": [
       { "item": "Winner Prizes: ₹15,000" },
-      { "item": "Refreshments: ₹7,000" }
+      { "item": "Refreshments: ₹10,000" }
     ],
     "approved": true
-  },
-  "created_at": ISODate("2026-09-20T10:00:00Z")
+  }
 }
 ```
 
-### 3. `registrations`
+#### `registrations` Collection
 ```json
 {
-  "_id": ObjectId("..."),
-  "event_id": ObjectId("..."),
-  "student_id": ObjectId("..."),
+  "_id": "ObjectId('6701a1b2c3d4e5f6a7b8c903')",
+  "event_id": "ObjectId('6701a1b2c3d4e5f6a7b8c902')",
+  "student_id": "ObjectId('6701a1b2c3d4e5f6a7b8c901')",
   "ticket_code": "TKT-HACK2026-001",
   "status": "registered",
-  "registered_at": ISODate("2026-09-25T11:00:00Z"),
+  "registered_at": "2026-09-25T11:00:00Z",
   "check_in_time": null,
   "check_in_by": null
 }
 ```
 
-### 4. `venues`
-```json
-{
-  "_id": ObjectId("..."),
-  "name": "Sir C.V. Raman Grand Auditorium",
-  "code": "AUD-01",
-  "capacity": 350,
-  "facilities": ["Dolby Surround Audio", "Laser Projector", "Central AC"],
-  "is_active": true
-}
-```
-
-### 5. `feedback`
-```json
-{
-  "_id": ObjectId("..."),
-  "event_id": ObjectId("..."),
-  "student_id": ObjectId("..."),
-  "rating": 5,
-  "comment": "The hands-on aggregation demo was fantastic and clear!",
-  "sentiment_label": "Positive",
-  "sentiment_score": 0.9,
-  "sentiment_keywords": { "positive": ["fantastic", "clear"], "negative": [] },
-  "organizer_response": {
-    "text": "Thank you Rahul! Glad you enjoyed it.",
-    "responded_by": ObjectId("..."),
-    "responded_at": ISODate("2026-09-26T12:00:00Z")
-  }
-}
-```
-
 ---
 
-## 4. Tech Stack
+## Technology Stack
 
-- **Backend**: Python 3.14+, Flask 3.1
+- **Backend**: Python 3.11+, Flask 3.1
 - **Database**: MongoDB 6+ / MongoDB Atlas with `PyMongo` 4.18
-- **In-Memory Mock Fallback**: `mongomock`
+- **In-Memory Fallback**: `mongomock`
+- **WSGI Production Servers**: `gunicorn` (Linux/Cloud), `waitress` (Windows)
 - **Frontend**: HTML5, CSS3, Bootstrap 5.3, FontAwesome 6, Vanilla JavaScript
-- **Data Visualizations**: Chart.js 4.4
-- **QR Ticketing**: `qrcode` with Pillow
+- **Visualizations**: Chart.js 4.4
+- **QR Engine**: `qrcode` with Pillow
 - **Testing**: `pytest`
 
 ---
 
-## 5. Windows Setup & Installation
+## Quick Start Guide
 
-### Step 1: Open PowerShell in the project directory
-```powershell
-cd c:\Users\Shweta\Desktop\anti_gravity_workspace\CollegeEventManagement
+### 1. Clone the Repository
+```bash
+git clone https://github.com/shweeta1015/CollegeEventManagement.git
+cd CollegeEventManagement
 ```
 
-### Step 2: Install Dependencies
-```powershell
-python -m pip install -r requirements.txt
+### 2. Install Dependencies
+```bash
+pip install -r requirements.txt
 ```
 
-### Step 3: Configure Environment
-Copy `.env.example` to `.env` (already pre-configured with working defaults):
-```powershell
-Copy-Item .env.example .env
+### 3. Configure Environment Variables
+Copy `.env.example` to `.env`:
+```bash
+cp .env.example .env
 ```
+*(On Windows PowerShell: `Copy-Item .env.example .env`)*
 
-*Note on MongoDB connection:*
-- If you have MongoDB installed locally or a free MongoDB Atlas URI, set `MONGODB_URI` in `.env`:
-  `MONGODB_URI=mongodb+srv://<user>:<pass>@cluster0.mongodb.net/college_events_db?retryWrites=true&w=majority`
-- If no local MongoDB server is running, the app automatically switches to **mongomock** (high-fidelity in-memory MongoDB) so the application and tests run immediately without error!
+> **Note on MongoDB**: If you have a local MongoDB instance or MongoDB Atlas cluster, set `MONGODB_URI` in `.env`. If MongoDB is not running locally, the system automatically runs on an in-memory high-fidelity mock engine with zero setup.
 
-### Step 4: Populate Seed Data
-```powershell
+### 4. Populate Demonstration Data
+```bash
 python seed_data.py
 ```
 
-### Step 5: Run Application
-```powershell
+### 5. Launch Application
+```bash
 python app.py
 ```
 Open **`http://127.0.0.1:5000`** in your browser.
 
 ---
 
-## 6. Demo Accounts & Credentials
+## Demo Credentials
 
-The database seeder includes realistic mock accounts for quick evaluation:
+The database seeder includes pre-configured demonstration accounts for evaluation:
 
-| Role | Email | Password | Description |
+| Role | Email | Password | Pre-configured State |
 | :--- | :--- | :--- | :--- |
-| **Admin** | `admin@college.edu` | `Admin@123` | Dean / Platform Administrator |
-| **Organizer (Verified)** | `organizer1@college.edu` | `Organizer@123` | ACM Lead (can publish events, scan tickets) |
-| **Organizer (Pending)** | `organizer2@college.edu` | `Organizer@123` | Music Club Lead (under admin review) |
-| **Student (With Ticket)** | `student1@college.edu` | `Student@123` | Has active QR ticket and attended seminar |
-| **Student** | `student2@college.edu` | `Student@123` | General student attendee |
+| **Administrator** | `admin@college.edu` | `Admin@123` | Full access to approval queues, venue management, audit logs, and reports |
+| **Organizer (Verified)** | `organizer1@college.edu` | `Organizer@123` | Verified ACM Lead with active events, attendee rosters, and QR check-in terminal |
+| **Organizer (Pending)** | `organizer2@college.edu` | `Organizer@123` | Pending review; demonstrates the verification gate (cannot publish until approved) |
+| **Student (Attendee)** | `student1@college.edu` | `Student@123` | Has active QR ticket and checked-in attendance record eligible for reviews |
+| **Student (General)** | `student2@college.edu` | `Student@123` | Unregistered attendee to test fresh event registration and waitlisting |
 
-*Tip: The login page includes 1-click **Quick Demo Fill** buttons to speed up demonstration during evaluation!*
+*Tip: The sign-in page features 1-click **Quick Demo Fill** buttons to speed up demonstration during evaluation.*
 
 ---
 
-## 7. API Endpoints Reference
+## API Endpoints Reference
 
 | Endpoint | Method | Role | Description |
 | :--- | :--- | :--- | :--- |
-| `/api/checkin` | `POST` | Organizer, Admin | JSON QR scanner check-in terminal |
-| `/api/export/event/<event_id>/attendees.csv` | `GET` | Organizer, Admin | Download event attendee roster CSV |
-| `/api/export/admin/events.csv` | `GET` | Admin | Download system-wide event statistics CSV |
-| `/api/reports/charts-data` | `GET` | Admin | Aggregated data for Chart.js dashboard |
+| `/api/checkin` | `POST` | Organizer, Admin | JSON QR scanner terminal for live attendee check-in |
+| `/api/export/event/<id>/attendees.csv` | `GET` | Organizer, Admin | Export event attendee roster in CSV format |
+| `/api/export/admin/events.csv` | `GET` | Admin | Export system-wide events and metrics in CSV format |
+| `/api/reports/charts-data` | `GET` | Admin | Real-time aggregation feed for Chart.js dashboards |
 
 ---
 
-## 8. Automated Testing
+## Automated Testing
 
-Run the comprehensive pytest suite covering CRUD, capacity concurrency, waitlist promotion, QR check-in, feedback permissions, and aggregation pipelines:
+The project includes an automated test suite covering authentication, role-based access control, event constraints, atomic capacity limits, QR check-in validation, and aggregation reports:
 
-```powershell
+```bash
 python -m pytest tests/ -v
 ```
 
----
-
-## 9. Cloud Deployment Guide
-
-The repository includes production deployment configurations for **Render**, **Railway**, and **MongoDB Atlas**:
-- `Procfile` and `render.yaml` for automatic containerized deployment.
-- `railway.json` for Railway NIXPACKS deployments.
-- `wsgi.py` production entrypoint with automatic demo database seeder on initial startup.
-- `run_waitress.py` for multi-threaded production serving on Windows.
-
-For detailed step-by-step instructions with screenshots guidance, refer to **[DEPLOYMENT.md](DEPLOYMENT.md)**.
+**Results**: 22 passed tests (100% pass rate).
 
 ---
 
-## 10. College Viva & Presentation Guide
+## Cloud Deployment
+
+The repository includes production configurations ready for deployment:
+- `Procfile` and `render.yaml` for one-click deployment on **Render.com**.
+- `railway.json` for **Railway.app** deployment.
+- `wsgi.py` production entrypoint with automatic demo seeding on brand-new cloud databases.
+- `run_waitress.py` for multi-threaded production hosting on Windows.
+
+For complete cloud setup instructions with MongoDB Atlas, see **[DEPLOYMENT.md](DEPLOYMENT.md)**.
+
+---
+
+## College Viva & Presentation Guide
 
 ### Key Questions to Anticipate in an ADBMS Viva:
 
-1. **Why choose MongoDB over traditional RDBMS like MySQL for this system?**
-   - *Answer:* College events have diverse polymorphic structures (hackathon rules, guest speaker bios, custom budget itemizations, media attachments) that vary across event types. MongoDB's document model allows flexible schema evolution without costly `ALTER TABLE` migrations. Furthermore, MongoDB aggregation pipelines efficiently compute cross-collection analytics directly inside the database engine.
+1. **Why use MongoDB instead of a traditional RDBMS like MySQL?**
+   - *Answer:* College events have dynamic and polymorphic structures (custom hackathon rules, speaker bios, varying budget breakdowns) that evolve across event types. MongoDB's document model accommodates schema evolution without expensive `ALTER TABLE` migrations. Furthermore, MongoDB aggregation pipelines allow complex multi-collection analytics to run directly inside the database engine.
 
-2. **How does your system prevent event overbooking under concurrent registrations?**
-   - *Answer:* We utilize MongoDB atomic conditional updates via `find_one_and_update`. The condition `{ registered_count: { $lt: capacity } }` ensures that only requests meeting the capacity criterion increment the counter (`{ $inc: { registered_count: 1 } }`). If multiple students click register simultaneously, MongoDB isolates each document update atomically at the document level, guaranteeing that capacity is never exceeded.
+2. **How does the system prevent event overbooking under high concurrency?**
+   - *Answer:* We utilize MongoDB atomic conditional updates via `find_one_and_update`. The condition `{ registered_count: { $lt: capacity } }` ensures that only requests meeting the capacity ceiling increment the counter (`{ $inc: { registered_count: 1 } }`). If multiple students attempt to register simultaneously, MongoDB isolates each update at the document level, guaranteeing that capacity is never exceeded.
 
-3. **How does waitlist promotion work?**
-   - *Answer:* When a confirmed attendee cancels, the system atomically decrements `registered_count` and executes a FIFO query on `registrations` sorting by `registered_at: 1` with `status: 'waitlisted'`. The oldest record is atomically transitioned to `status: 'registered'`, and an in-app priority notification is dispatched.
+3. **How does the waitlist promotion algorithm work?**
+   - *Answer:* When an attendee cancels a confirmed registration, the system atomically decrements `registered_count` and runs a FIFO query on `registrations` sorted by `registered_at: 1` with `status: 'waitlisted'`. The oldest record is atomically updated to `status: 'registered'`, and an in-app priority notification is immediately generated for that student.
 
-4. **What indexing strategies did you employ?**
+4. **What indexing strategies were implemented?**
    - *Answer:*
      - Unique single-field index on `users.email` and `registrations.ticket_code`.
-     - Compound index on `events (organizer_id, start_time)` to optimize the organizer dashboard query and date sorting.
-     - Compound unique index on `feedback (event_id, student_id)` to ensure one student can only submit one feedback per event.
+     - Compound index on `events (organizer_id, start_time)` to optimize organizer dashboard queries and chronological sorting.
+     - Compound unique index on `feedback (event_id, student_id)` to ensure each student can submit only one review per attended event.
